@@ -11,7 +11,7 @@ class SafeCommsClient
     private GuzzleClient $client;
     private string $baseUrl;
 
-    public function __construct(string $apiKey, string $baseUrl = 'https://safecomms.dev/api/v1/public')
+    public function __construct(string $apiKey, string $baseUrl = 'https://api.safecomms.dev')
     {
         $this->baseUrl = rtrim($baseUrl, '/');
         $this->client = new GuzzleClient([
