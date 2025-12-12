@@ -74,6 +74,90 @@ class SafeCommsClient
     }
 
     /**
+     * Moderate image content.
+     *
+     * @param string $image The image URL or base64 string to moderate.
+     * @param string $language The language of the content (default: 'en').
+     * @param string|null $moderationProfileId The ID of the moderation profile to use.
+     * @return array The moderation result.
+     * @throws \Exception If the API request fails.
+     */
+    public function moderateImage(
+        string $image,
+        string $language = 'en',
+        ?string $moderationProfileId = null
+    ): array {
+        $payload = [
+            'image' => $image,
+            'language' => $language,
+        ];
+
+        if ($moderationProfileId !== null) {
+            $payload['moderationProfileId'] = $moderationProfileId;
+        }
+
+        try {
+            $response = $this->client->post('/moderation/image', [
+                'json' => $payload,
+            ]);
+
+            return json_decode($response->getBody()->getContents(), true);
+        } catch (RequestException $e) {
+            $this->handleError($e);
+            throw $e;
+        } catch (GuzzleException $e) {
+            throw new \Exception('API request failed: ' . $e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Moderate image file.
+     *
+     * @param string $filePath The path to the image file.
+     * @param string $language The language of the content (default: 'en').
+     * @param string|null $moderationProfileId The ID of the moderation profile to use.
+     * @return array The moderation result.
+     * @throws \Exception If the API request fails.
+     */
+    public function moderateImageFile(
+        string $filePath,
+        string $language = 'en',
+        ?string $moderationProfileId = null
+    ): array {
+        $multipart = [
+            [
+                'name' => 'image',
+                'contents' => fopen($filePath, 'r'),
+                'filename' => basename($filePath)
+            ],
+            [
+                'name' => 'language',
+                'contents' => $language
+            ]
+        ];
+
+        if ($moderationProfileId !== null) {
+            $multipart[] = [
+                'name' => 'moderationProfileId',
+                'contents' => $moderationProfileId
+            ];
+        }
+
+        try {
+            $response = $this->client->post('/moderation/image/upload', [
+                'multipart' => $multipart,
+            ]);
+
+            return json_decode($response->getBody()->getContents(), true);
+        } catch (RequestException $e) {
+            $this->handleError($e);
+            throw $e;
+        } catch (GuzzleException $e) {
+            throw new \Exception('API request failed: ' . $e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
      * Get current usage statistics.
      *
      * @return array The usage statistics.
