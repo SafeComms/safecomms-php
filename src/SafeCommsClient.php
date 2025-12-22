@@ -79,17 +79,26 @@ class SafeCommsClient
      * @param string $image The image URL or base64 string to moderate.
      * @param string $language The language of the content (default: 'en').
      * @param string|null $moderationProfileId The ID of the moderation profile to use.
+     * @param bool $enableOcr Whether to extract text (OCR) from the image.
+     * @param bool $enhancedOcr Whether to use enhanced OCR for higher accuracy.
+     * @param bool $extractMetadata Whether to extract metadata (EXIF) from the image.
      * @return array The moderation result.
      * @throws \Exception If the API request fails.
      */
     public function moderateImage(
         string $image,
         string $language = 'en',
-        ?string $moderationProfileId = null
+        ?string $moderationProfileId = null,
+        bool $enableOcr = false,
+        bool $enhancedOcr = false,
+        bool $extractMetadata = false
     ): array {
         $payload = [
             'image' => $image,
             'language' => $language,
+            'enableOcr' => $enableOcr,
+            'enhancedOcr' => $enhancedOcr,
+            'extractMetadata' => $extractMetadata,
         ];
 
         if ($moderationProfileId !== null) {
@@ -116,13 +125,19 @@ class SafeCommsClient
      * @param string $filePath The path to the image file.
      * @param string $language The language of the content (default: 'en').
      * @param string|null $moderationProfileId The ID of the moderation profile to use.
+     * @param bool $enableOcr Whether to extract text (OCR) from the image.
+     * @param bool $enhancedOcr Whether to use enhanced OCR for higher accuracy.
+     * @param bool $extractMetadata Whether to extract metadata (EXIF) from the image.
      * @return array The moderation result.
      * @throws \Exception If the API request fails.
      */
     public function moderateImageFile(
         string $filePath,
         string $language = 'en',
-        ?string $moderationProfileId = null
+        ?string $moderationProfileId = null,
+        bool $enableOcr = false,
+        bool $enhancedOcr = false,
+        bool $extractMetadata = false
     ): array {
         $multipart = [
             [
@@ -133,6 +148,18 @@ class SafeCommsClient
             [
                 'name' => 'language',
                 'contents' => $language
+            ],
+            [
+                'name' => 'enableOcr',
+                'contents' => $enableOcr ? 'true' : 'false'
+            ],
+            [
+                'name' => 'enhancedOcr',
+                'contents' => $enhancedOcr ? 'true' : 'false'
+            ],
+            [
+                'name' => 'extractMetadata',
+                'contents' => $extractMetadata ? 'true' : 'false'
             ]
         ];
 
